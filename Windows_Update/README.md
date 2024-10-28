@@ -63,3 +63,11 @@ Using with caution. We will fixing the Component file.
     > Dism /Online /Cleanup-Image /RestoreHealth
     > sfc /scannow
     ```
+
+## Other 
+
+### Patch Tuesday
+- Patch Tuesday is a monthly release of Windows updates that are released on the second Tuesday of each month.
+- It is aimed at providing users with the latest security and quality updates for Windows.
+
+Ref: https://en.wikipedia.org/wiki/Patch_Tuesday
