@@ -117,6 +117,8 @@ def create_details_table(xml_data, db_path):
             id TEXT,
             file_id TEXT,
             bundle_id TEXT,
+            languages TEXT,
+            prerequisites TEXT,
             FOREIGN KEY (id) REFERENCES Updates(id)
         )
     ''')
@@ -124,17 +126,13 @@ def create_details_table(xml_data, db_path):
     # Extract and insert each <Update> element into the tables
     for update in xml_data.find('{http://schemas.microsoft.com/msus/2004/02/OfflineSync}Updates'):
         update_data = {
-            "id": update.attrib.get('UpdateId'),
-            "DeploymentAction": update.attrib.get('DeploymentAction', None)
+            "id": update.attrib.get('UpdateId')
         }
-        
-        # Extract file_id and bundle_id for Update_details table
-
-        if update_data["DeploymentAction"] != "Bundle":
-            continue
 
         file_id = None
         bundle_id = None
+        languages_data = None
+        prerequisites_data = None
 
         # Check if there's a <PayloadFiles> and extract <File Id>
         payload_files = update.find('{http://schemas.microsoft.com/msus/2004/02/OfflineSync}PayloadFiles')
@@ -150,11 +148,26 @@ def create_details_table(xml_data, db_path):
             if revision_element is not None:
                 bundle_id = revision_element.attrib.get('Id')
         
+        
+        # Check if there's a <Languages> element and extract <Language Name>
+        languages = update.find('{http://schemas.microsoft.com/msus/2004/02/OfflineSync}Languages')
+        if languages is not None:
+            languages_data = [lang.get('Name') for lang in languages.findall('{http://schemas.microsoft.com/msus/2004/02/OfflineSync}Language')]
+            languages_data = ','.join(str(v) for v in languages_data)
+        
+        # Extract Prerequisites
+        prerequisites = update.find('{http://schemas.microsoft.com/msus/2004/02/OfflineSync}Prerequisites')
+        if prerequisites is not None:
+            prerequisites_data = [prerequisite.get('Id') for prerequisite in prerequisites.findall('{http://schemas.microsoft.com/msus/2004/02/OfflineSync}UpdateId')]
+            for or_element in prerequisites.findall('{http://schemas.microsoft.com/msus/2004/02/OfflineSync}Or'):
+                prerequisites_data.append([or_prerequisite.get('Id') for or_prerequisite in or_element.findall('{http://schemas.microsoft.com/msus/2004/02/OfflineSync}UpdateId')])
+            prerequisites_data = ','.join(str(v) for v in prerequisites_data)
+
         # Insert file_id and bundle_id into the Update_details table
         cursor.execute('''
-            INSERT OR IGNORE INTO Update_details (id, file_id, bundle_id)
-            VALUES (?, ?, ?)
-        ''', (update_data["id"], file_id, bundle_id))
+            INSERT OR IGNORE INTO Update_details (id, file_id, bundle_id, languages, prerequisites)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (update_data["id"], file_id, bundle_id, languages_data, prerequisites_data))
     
     # Commit the transaction and close the connection
     conn.commit()
