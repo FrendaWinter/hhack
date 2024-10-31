@@ -1,5 +1,6 @@
 import subprocess
 import os
+import re
 import sqlite3
 import xml.etree.ElementTree as ET
 
@@ -160,6 +161,24 @@ def create_details_table(xml_data, db_path):
     conn.close()
     print("Data Update details inserted successfully.")
 
+def extract_all_packages(base_folder):
+    """Extracts all package.cab files in the base folder."""
+    pattern = re.compile(r'package(\d+)\.cab')
+    package_numbers = []
+
+    # Iterate over files in the folder
+    for filename in os.listdir(base_folder):
+        match = pattern.match(filename)
+        if match:
+            # Convert the extracted number to an integer and add to the list
+            package_numbers.append(int(match.group(1)))
+    
+    print(package_numbers)
+    for i in range(min(package_numbers), max(package_numbers)):
+        archive_path = os.path.join(base_folder, f"package{i}.cab")
+        output_folder = os.path.join(base_folder, f"package{i}_extracted")
+        extract_7z(archive_path, output_folder)
+
 def main():
     # Example usage
     archive_path = "wsusscn2.cab"
@@ -168,11 +187,14 @@ def main():
     # Extract wsusscn2.cab to wsusscn2_extracted
     extract_7z(archive_path, output_folder)
 
+    # Extract other package.cab files
+    extract_all_packages(output_folder)
+
     # Extract package.cab
     archive_path = output_folder + "/package.cab"
     output_folder = output_folder + "/package_extracted"
     extract_7z(archive_path, output_folder)
-
+    
     # Read content of package.xml
     current_file = output_folder + "/package.xml"
     root = ET.parse(current_file, parser = ET.XMLParser(encoding = 'utf-8'))
