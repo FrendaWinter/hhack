@@ -175,7 +175,6 @@ def main():
 
     # Read content of package.xml
     current_file = output_folder + "/package.xml"
-    # root = ET.fromstring(f.read(), parser=parser)
     root = ET.parse(current_file, parser = ET.XMLParser(encoding = 'utf-8'))
     
     db_path = "updates.db"
