@@ -192,6 +192,37 @@ def extract_all_packages(base_folder):
         output_folder = os.path.join(base_folder, f"package{i}_extracted")
         extract_7z(archive_path, output_folder)
 
+def extract_index_xml(base_folder):
+    """Extracts the index.xml file from the base folder."""
+    index_xml_path = os.path.join(base_folder, "index.xml")
+    root = ET.parse(index_xml_path, parser = ET.XMLParser(encoding = 'utf-8'))
+
+    cabs = root.find('CABLIST').findall('CAB')
+    
+    package_ranges = {}
+    previous_range_start = 0
+
+    # Process each package
+    for i, cab in enumerate(cabs):
+        # Get package name without ".cab"
+        package_name = cab.get('NAME').replace('.cab', '')
+
+        # Get the start range (default to previous if not present)
+        current_range_start = int(cab.get('RANGESTART', previous_range_start))
+
+        # Determine end range (one less than next package's start, if it exists)
+        if i + 1 < len(cabs) and 'RANGESTART' in cabs[i + 1].attrib:
+            next_range_start = int(cabs[i + 1].get('RANGESTART'))
+            end_index = next_range_start - 1
+        else:
+            end_index = None  # Last package has no end range
+
+        # Save to dictionary
+        package_ranges[package_name] = {"start": current_range_start, "end": end_index}
+        previous_range_start = current_range_start
+    
+    return package_ranges
+
 def main():
     # Example usage
     archive_path = "wsusscn2.cab"
@@ -199,6 +230,9 @@ def main():
     
     # Extract wsusscn2.cab to wsusscn2_extracted
     extract_7z(archive_path, output_folder)
+
+    # Read content of index.xml
+    index_content = extract_index_xml(output_folder)
 
     # Extract other package.cab files
     extract_all_packages(output_folder)

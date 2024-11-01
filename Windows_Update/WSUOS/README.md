@@ -11,6 +11,10 @@
     - [`Index.xml` file](#indexxml-file)
     - [`Package.cab` file](#packagecab-file)
       - [The `package.xml` file](#the-packagexml-file)
+    - [`Package<number>.cab` file](#packagenumbercab-file)
+- [The Rules](#the-rules)
+  - [`IsInstalled` Rule](#isinstalled-rule)
+  - [`IsInstallable` Rule](#isinstallable-rule)
 
 
 # Introduction
@@ -103,3 +107,21 @@ Some important properties of the `Update` tag:
 - `RevisionId`: The revision id of the update. It is unique for each update. Refers to the number in `index.xml` file.
 - `DeploymentAction`: The deployment action of the update. If it is `Bundle` it means that the update is a bundle.
 
+### `Package<number>.cab` file
+
+The `Package<number>.cab` file contains
+- The `c` Folder - Core Files. Contains the relationship and Applicability Rules
+  - Rule for `IsInstalled`
+  - Rule for `IsInstallable`
+- The `files` Folder - Introduction, description content.
+- The `l` Folder - Language, Localized Properties.
+- The `x` Folder - Extended Properties.
+- The `e` Folder - Eula.
+
+# The Rules
+
+- `IsInstalled` Rule: The `IsInstalled` rule is used to check if the update is already installed on the system.
+
+-  `IsInstallable` Rule: The `IsInstallable` rule is used to check if the update is installable on the system.
+
+`CBS` is Component-Based Servicing system, which is a framework used in Windows for managing and deploying system components, especially during updates. CBS handles the installation, update, and removal of Windows components, ensuring system integrity during the update process.

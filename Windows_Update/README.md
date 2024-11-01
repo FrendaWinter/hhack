@@ -14,6 +14,10 @@
   - Service Windows images: DISM allows you to modify Windows image files (.wim), virtual hard disk (.vhd), and .vhdx files. This includes adding or removing Windows features, drivers, updates, and language packs.
   - Manage Windows features and packages
   - Repair Windows installations: DISM can be used to repair a running Windows installation, especially when system files are corrupted.
+  - DISM log location: `C:\Windows\Logs\DISM`
+    - CBS log location: `C:\Windows\Logs\CBS`
+    - These two log is important to check the progress of the DISM command.
+    - Ref: [Debug CBS log](https://learn.microsoft.com/en-us/troubleshoot/windows-server/installing-updates-features-roles/cbs-log-file-record-entries-not-repaired-run-sfc) 
 
 - **wsusscn2.cab file:** is a database of security updates released by Microsoft for every version of Windows from 2000 to 11, and Microsoft Update products such as Office and SQL Server. You can use this file to determine which updates are missing on a PC, without being connected to the internet.
   - It only `Security Updates`. You can look what `Classification` of the KB on the catalog website.
