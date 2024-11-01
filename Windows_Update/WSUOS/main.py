@@ -3,7 +3,57 @@ import os
 import re
 import sqlite3
 import xml.etree.ElementTree as ET
+import xmltodict
+import json
 
+def find_package_for_id(id_num, index_content):
+    # Search for the package that contains the ID
+    for package, range_values in index_content.items():
+        if range_values["start"] <= id_num <= (range_values["end"] or float('inf')):
+            return package
+    return None  # ID not found in any package range
+
+def find_file_in_package_folder(id_str, package_name):
+    # Define the folder path
+    folder_path = f"wsusscn2_extracted/{package_name}_extracted/c/"
+    
+    # Check if folder exists
+    if not os.path.isdir(folder_path):
+        print(f"Folder {folder_path} does not exist.")
+        return None
+
+    # Look for a file that matches the ID
+    for filename in os.listdir(folder_path):
+        if filename == id_str:
+            return os.path.join(folder_path, filename)
+    
+    print(f"No file named {id_str} found in {folder_path}.")
+    return None
+
+# Main function
+def find_file_by_id(id_text, index_content):
+    # Convert ID to integer
+    try:
+        id_num = int(id_text)
+    except ValueError:
+        print("Invalid ID format. Please provide a numeric ID.")
+        return None
+
+    # Find the package the ID belongs to
+    package = find_package_for_id(id_num, index_content)
+    if not package:
+        print("ID does not belong to any known package.")
+        return None
+
+    # Find the file in the package's folder
+    file_path = find_file_in_package_folder(id_text, package)
+    if file_path:
+        print(f"File found: {file_path}")
+        return file_path
+    else:
+        print("File not found.")
+        return None
+    
 def extract_7z(archive_path, output_folder):
     # Ensure the output folder exists
     os.makedirs(output_folder, exist_ok=True)
@@ -17,7 +67,7 @@ def extract_7z(archive_path, output_folder):
     except subprocess.CalledProcessError as e:
         print(f"Error during extraction: {e}")
 
-def create_metadata_table(xml_data, db_path):
+def create_metadata_table(xml_data, db_path, index_content):
     # Connect to SQLite database (or create it if it doesn't exist)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -32,7 +82,8 @@ def create_metadata_table(xml_data, db_path):
             DefaultLanguage TEXT,
             IsLeaf TEXT,
             IsBundle TEXT,
-            DeploymentAction TEXT
+            DeploymentAction TEXT,
+            Core TEXT
         )
     ''')
     
@@ -49,12 +100,22 @@ def create_metadata_table(xml_data, db_path):
             "DeploymentAction": update.attrib.get('DeploymentAction', None),
         }
         
+        core_file_location = find_file_by_id(update_data["RevisionId"], index_content)
+
+        core_content = None
+        with open(core_file_location, 'r') as file:
+            xml_content = file.read()
+            # Parse XML content into an OrderedDict
+            parsed_dict = xmltodict.parse(xml_content)
+            print(f"Core content: {parsed_dict}")
+            core_content = json.dumps(parsed_dict)
+
         # Insert into the database
         cursor.execute('''
             INSERT OR IGNORE INTO Updates_metadata (
                 id, CreationDate, RevisionId, RevisionNumber, DefaultLanguage, 
-                IsLeaf, IsBundle, DeploymentAction
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                IsLeaf, IsBundle, DeploymentAction, Core
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             update_data["id"],
             update_data["CreationDate"],
@@ -63,7 +124,8 @@ def create_metadata_table(xml_data, db_path):
             update_data["DefaultLanguage"],
             update_data["IsLeaf"],
             update_data["IsBundle"],
-            update_data["DeploymentAction"]
+            update_data["DeploymentAction"],
+            core_content
         ))
     
     # Commit the transaction and close the connection
@@ -235,12 +297,12 @@ def main():
     index_content = extract_index_xml(output_folder)
 
     # Extract other package.cab files
-    extract_all_packages(output_folder)
+    # extract_all_packages(output_folder)
 
     # Extract package.cab
     archive_path = output_folder + "/package.cab"
     output_folder = output_folder + "/package_extracted"
-    extract_7z(archive_path, output_folder)
+    # extract_7z(archive_path, output_folder)
     
     # Read content of package.xml
     current_file = output_folder + "/package.xml"
@@ -248,7 +310,7 @@ def main():
     
     db_path = "updates.db"
     # Create Updates_metadata table in SQLite database
-    create_metadata_table(root, db_path)
+    create_metadata_table(root, db_path, index_content)
     
     # Create File_locations table in SQLite database
     create_file_locations_table(root, db_path)
