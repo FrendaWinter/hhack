@@ -6,6 +6,8 @@ import xml.etree.ElementTree as ET
 import xmltodict
 import json
 
+# ---------- Utility Functions ----------
+
 def find_package_for_id(id_num, index_content):
     # Search for the package that contains the ID
     for package, range_values in index_content.items():
@@ -30,7 +32,6 @@ def find_file_in_package_folder(id_str, package_name):
     print(f"No file named {id_str} found in {folder_path}.")
     return None
 
-# Main function
 def find_file_by_id(id_text, index_content):
     # Convert ID to integer
     try:
@@ -67,6 +68,34 @@ def extract_7z(archive_path, output_folder):
     except subprocess.CalledProcessError as e:
         print(f"Error during extraction: {e}")
 
+# ---------- Main Functions ----------
+def extract_core_data(revision_id, index_content):
+    core_file_location = find_file_by_id(revision_id, index_content)
+    try:
+        file = open(core_file_location, encoding="utf8")
+        # Workaround to able to parse the XML content
+        xml_content = "<root>" + file.read() + "</root>"
+        root = ET.fromstring(xml_content)
+        
+        # Get the Properties UpdateType attribute
+        properties = root.find("Properties")
+        update_type = properties.get("UpdateType") if properties is not None else None
+        
+        # Get the content of ApplicabilityRules and Relationships tags
+        applicability_rules = root.find("ApplicabilityRules")
+        applicability_content = ET.tostring(applicability_rules, encoding="utf-8") if applicability_rules is not None else None
+        applicability_content = json.dumps(xmltodict.parse(applicability_content)) if applicability_rules is not None else None
+        
+        relationships = root.find("Relationships")
+        relationships_content = ET.tostring(relationships, encoding="utf-8") if relationships is not None else None
+        relationships_content = json.dumps(xmltodict.parse(relationships_content)) if relationships is not None else None
+
+        return update_type, applicability_content, relationships_content
+    
+    except ET.ParseError as e:
+        print(f"Error parsing XML: {e}")
+        return None, None, None
+
 def create_metadata_table(xml_data, db_path, index_content):
     # Connect to SQLite database (or create it if it doesn't exist)
     conn = sqlite3.connect(db_path)
@@ -83,7 +112,9 @@ def create_metadata_table(xml_data, db_path, index_content):
             IsLeaf TEXT,
             IsBundle TEXT,
             DeploymentAction TEXT,
-            Core TEXT
+            Properties TEXT,
+            Relationships TEXT,
+            ApplicabilityRules TEXT
         )
     ''')
     
@@ -100,20 +131,14 @@ def create_metadata_table(xml_data, db_path, index_content):
             "DeploymentAction": update.attrib.get('DeploymentAction', None),
         }
         
-        core_file_location = find_file_by_id(update_data["RevisionId"], index_content)
-        core_content = None
-        if core_file_location != None:
-            file = open(core_file_location, encoding="utf8")
-            xml_content = file.read()
-            xml_content = "<root>" + xml_content + "</root>"
-            core_content = json.dumps(xmltodict.parse(xml_content))
+        Properties, Relationships, ApplicabilityRules = extract_core_data(update_data["RevisionId"], index_content)
 
         # Insert into the database
         cursor.execute('''
             INSERT OR IGNORE INTO Updates_metadata (
                 id, CreationDate, RevisionId, RevisionNumber, DefaultLanguage, 
-                IsLeaf, IsBundle, DeploymentAction, Core
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                IsLeaf, IsBundle, DeploymentAction, Properties, Relationships, ApplicabilityRules
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             update_data["id"],
             update_data["CreationDate"],
@@ -123,7 +148,7 @@ def create_metadata_table(xml_data, db_path, index_content):
             update_data["IsLeaf"],
             update_data["IsBundle"],
             update_data["DeploymentAction"],
-            core_content
+            Properties, Relationships, ApplicabilityRules
         ))
     
     # Commit the transaction and close the connection
@@ -295,12 +320,12 @@ def main():
     index_content = extract_index_xml(output_folder)
 
     # Extract other package.cab files
-    extract_all_packages(output_folder)
+    # extract_all_packages(output_folder)
 
     # Extract package.cab
     archive_path = output_folder + "/package.cab"
     output_folder = output_folder + "/package_extracted"
-    extract_7z(archive_path, output_folder)
+    # extract_7z(archive_path, output_folder)
     
     # Read content of package.xml
     current_file = output_folder + "/package.xml"
