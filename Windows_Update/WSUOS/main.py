@@ -48,10 +48,10 @@ def find_file_by_id(id_text, index_content):
     # Find the file in the package's folder
     file_path = find_file_in_package_folder(id_text, package)
     if file_path:
-        print(f"File found: {file_path}")
+        # print(f"File found: {file_path}")
         return file_path
     else:
-        print("File not found.")
+        # print(f"File not found. Id: {id_text}, package: {package}")
         return None
     
 def extract_7z(archive_path, output_folder):
@@ -101,14 +101,12 @@ def create_metadata_table(xml_data, db_path, index_content):
         }
         
         core_file_location = find_file_by_id(update_data["RevisionId"], index_content)
-
         core_content = None
-        with open(core_file_location, 'r') as file:
+        if core_file_location != None:
+            file = open(core_file_location, encoding="utf8")
             xml_content = file.read()
-            # Parse XML content into an OrderedDict
-            parsed_dict = xmltodict.parse(xml_content)
-            print(f"Core content: {parsed_dict}")
-            core_content = json.dumps(parsed_dict)
+            xml_content = "<root>" + xml_content + "</root>"
+            core_content = json.dumps(xmltodict.parse(xml_content))
 
         # Insert into the database
         cursor.execute('''
@@ -249,7 +247,7 @@ def extract_all_packages(base_folder):
             package_numbers.append(int(match.group(1)))
     
     print(package_numbers)
-    for i in range(min(package_numbers), max(package_numbers)):
+    for i in range(min(package_numbers), max(package_numbers) + 1):
         archive_path = os.path.join(base_folder, f"package{i}.cab")
         output_folder = os.path.join(base_folder, f"package{i}_extracted")
         extract_7z(archive_path, output_folder)
@@ -297,12 +295,12 @@ def main():
     index_content = extract_index_xml(output_folder)
 
     # Extract other package.cab files
-    # extract_all_packages(output_folder)
+    extract_all_packages(output_folder)
 
     # Extract package.cab
     archive_path = output_folder + "/package.cab"
     output_folder = output_folder + "/package_extracted"
-    # extract_7z(archive_path, output_folder)
+    extract_7z(archive_path, output_folder)
     
     # Read content of package.xml
     current_file = output_folder + "/package.xml"
@@ -320,3 +318,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+## TODO: Keep database connection open and reuse it for multiple queries.
+## TODO: Use Thread or Process to extract packages in parallel.
