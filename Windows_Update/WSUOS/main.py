@@ -7,7 +7,7 @@ import xmltodict
 import json
 import time
 
-index_content = {}
+
 class SQLiteSingleton:
     _instance = None  # Class variable to hold the singleton instance
 
@@ -30,7 +30,10 @@ class SQLiteSingleton:
         self.connection.close()
         self.__class__._instance = None  # Reset singleton instance
 
+# ---------- Initialization ----------
+
 db = SQLiteSingleton("updates.db")
+index_content = {}
 
 # ---------- Utility Functions ----------
 
@@ -69,7 +72,7 @@ def find_file_by_id(id_text):
         return None
 
     # Find the package the ID belongs to
-    package = find_package_for_id(id_num, index_content)
+    package = find_package_for_id(id_num)
     if not package:
         print("ID does not belong to any known package.")
         return None
@@ -99,7 +102,7 @@ def extract_7z(archive_path, output_folder):
 # ---------- Main Functions ----------
 def extract_core_data(revision_id):
     global index_content
-    core_file_location = find_file_by_id(revision_id, index_content)
+    core_file_location = find_file_by_id(revision_id)
     try:
         file = open(core_file_location, encoding="utf8")
         # Workaround to able to parse the XML content
@@ -158,7 +161,7 @@ def create_metadata_table(xml_data):
             "DeploymentAction": update.attrib.get('DeploymentAction', None),
         }
         
-        Properties, Relationships, ApplicabilityRules = extract_core_data(update_data["RevisionId"], index_content)
+        Properties, Relationships, ApplicabilityRules = extract_core_data(update_data["RevisionId"])
 
         # Insert into the database
         db.cursor.execute('''
@@ -320,7 +323,7 @@ def extract_index_xml(base_folder):
 def main():
     start_time = time.time()
 
-    global index_content, db
+    global db
     # Example usage
     archive_path = "wsusscn2.cab"
     output_folder = "wsusscn2_extracted"
@@ -329,7 +332,7 @@ def main():
     extract_7z(archive_path, output_folder)
 
     # Read content of index.xml
-    index_content = extract_index_xml(output_folder)
+    extract_index_xml(output_folder)
 
     # Extract other package.cab files
     extract_all_packages(output_folder)
