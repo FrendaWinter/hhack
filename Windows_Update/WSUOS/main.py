@@ -5,40 +5,10 @@ import sqlite3
 import xml.etree.ElementTree as ET
 import xmltodict
 import json
-import time
-
-
-class SQLiteSingleton:
-    _instance = None  # Class variable to hold the singleton instance
-
-    def __new__(cls, db_path):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._init_connection(db_path)  # Initialize the connection
-        return cls._instance
-
-    def _init_connection(self, db_path):
-        # Establish connection to the database
-        self.connection = sqlite3.connect(db_path)
-        self.cursor = self.connection.cursor()
-
-        
-
-    def close_connection(self):
-        # Close the cursor and connection
-        self.cursor.close()
-        self.connection.close()
-        self.__class__._instance = None  # Reset singleton instance
-
-# ---------- Initialization ----------
-
-db = SQLiteSingleton("updates.db")
-index_content = {}
 
 # ---------- Utility Functions ----------
 
-def find_package_for_id(id_num):
-    global index_content
+def find_package_for_id(id_num, index_content):
     # Search for the package that contains the ID
     for package, range_values in index_content.items():
         if range_values["start"] <= id_num <= (range_values["end"] or float('inf')):
@@ -62,8 +32,7 @@ def find_file_in_package_folder(id_str, package_name):
     print(f"No file named {id_str} found in {folder_path}.")
     return None
 
-def find_file_by_id(id_text):
-    global index_content
+def find_file_by_id(id_text, index_content):
     # Convert ID to integer
     try:
         id_num = int(id_text)
@@ -72,7 +41,7 @@ def find_file_by_id(id_text):
         return None
 
     # Find the package the ID belongs to
-    package = find_package_for_id(id_num)
+    package = find_package_for_id(id_num, index_content)
     if not package:
         print("ID does not belong to any known package.")
         return None
@@ -100,9 +69,8 @@ def extract_7z(archive_path, output_folder):
         print(f"Error during extraction: {e}")
 
 # ---------- Main Functions ----------
-def extract_core_data(revision_id):
-    global index_content
-    core_file_location = find_file_by_id(revision_id)
+def extract_core_data(revision_id, index_content):
+    core_file_location = find_file_by_id(revision_id, index_content)
     try:
         file = open(core_file_location, encoding="utf8")
         # Workaround to able to parse the XML content
@@ -122,17 +90,19 @@ def extract_core_data(revision_id):
         relationships_content = ET.tostring(relationships, encoding="utf-8") if relationships is not None else None
         relationships_content = json.dumps(xmltodict.parse(relationships_content)) if relationships is not None else None
 
-        return update_type, applicability_content, relationships_content
+        return update_type, relationships_content, applicability_content
     
     except ET.ParseError as e:
         print(f"Error parsing XML: {e}")
         return None, None, None
 
-def create_metadata_table(xml_data):
-    global index_content, db
+def create_metadata_table(xml_data, db_path, index_content):
+    # Connect to SQLite database (or create it if it doesn't exist)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
 
     # Create the Updates table
-    db.cursor.execute('''
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS Updates_metadata (
             id TEXT PRIMARY KEY,
             CreationDate TEXT,
@@ -161,10 +131,10 @@ def create_metadata_table(xml_data):
             "DeploymentAction": update.attrib.get('DeploymentAction', None),
         }
         
-        Properties, Relationships, ApplicabilityRules = extract_core_data(update_data["RevisionId"])
+        Properties, Relationships, ApplicabilityRules = extract_core_data(update_data["RevisionId"], index_content)
 
         # Insert into the database
-        db.cursor.execute('''
+        cursor.execute('''
             INSERT OR IGNORE INTO Updates_metadata (
                 id, CreationDate, RevisionId, RevisionNumber, DefaultLanguage, 
                 IsLeaf, IsBundle, DeploymentAction, Properties, Relationships, ApplicabilityRules
@@ -181,12 +151,18 @@ def create_metadata_table(xml_data):
             Properties, Relationships, ApplicabilityRules
         ))
     
+    # Commit the transaction and close the connection
+    conn.commit()
+    conn.close()
     print("Data metadata inserted successfully.")
 
-def create_file_locations_table(xml_data):
-    global db
+def create_file_locations_table(xml_data, db_path):
+    # Connect to SQLite database (or create it if it doesn't exist)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
     # Create the Updates table
-    db.cursor.execute('''
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS File_locations (
             id TEXT PRIMARY KEY,
             Url TEXT
@@ -201,7 +177,7 @@ def create_file_locations_table(xml_data):
         }
         
         # Insert into the database
-        db.cursor.execute('''
+        cursor.execute('''
             INSERT OR IGNORE INTO File_locations (
                 id, Url
             ) VALUES (?, ?)
@@ -210,12 +186,18 @@ def create_file_locations_table(xml_data):
             update_data["Url"]
         ))
     
+    # Commit the transaction and close the connection
+    conn.commit()
+    conn.close()
     print("Data file locations inserted successfully.")
 
-def create_details_table(xml_data):
-    global db
+def create_details_table(xml_data, db_path):
+    # Connect to SQLite database (or create it if it doesn't exist)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
     # Create the Update_details table for storing file_id and bundle_id
-    db.cursor.execute('''
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS Update_details (
             id TEXT,
             file_id TEXT,
@@ -267,11 +249,14 @@ def create_details_table(xml_data):
             prerequisites_data = ','.join(str(v) for v in prerequisites_data)
 
         # Insert file_id and bundle_id into the Update_details table
-        db.cursor.execute('''
+        cursor.execute('''
             INSERT OR IGNORE INTO Update_details (id, file_id, bundle_id, languages, prerequisites)
             VALUES (?, ?, ?, ?, ?)
         ''', (update_data["id"], file_id, bundle_id, languages_data, prerequisites_data))
     
+    # Commit the transaction and close the connection
+    conn.commit()
+    conn.close()
     print("Data Update details inserted successfully.")
 
 def extract_all_packages(base_folder):
@@ -293,12 +278,13 @@ def extract_all_packages(base_folder):
         extract_7z(archive_path, output_folder)
 
 def extract_index_xml(base_folder):
-    global index_content
     """Extracts the index.xml file from the base folder."""
     index_xml_path = os.path.join(base_folder, "index.xml")
     root = ET.parse(index_xml_path, parser = ET.XMLParser(encoding = 'utf-8'))
 
     cabs = root.find('CABLIST').findall('CAB')
+    
+    package_ranges = {}
     previous_range_start = 0
 
     # Process each package
@@ -317,13 +303,12 @@ def extract_index_xml(base_folder):
             end_index = None  # Last package has no end range
 
         # Save to dictionary
-        index_content[package_name] = {"start": current_range_start, "end": end_index}
+        package_ranges[package_name] = {"start": current_range_start, "end": end_index}
         previous_range_start = current_range_start
+    
+    return package_ranges
 
 def main():
-    start_time = time.time()
-
-    global db
     # Example usage
     archive_path = "wsusscn2.cab"
     output_folder = "wsusscn2_extracted"
@@ -332,34 +317,29 @@ def main():
     extract_7z(archive_path, output_folder)
 
     # Read content of index.xml
-    extract_index_xml(output_folder)
+    index_content = extract_index_xml(output_folder)
 
     # Extract other package.cab files
-    extract_all_packages(output_folder)
+    # extract_all_packages(output_folder)
 
     # Extract package.cab
     archive_path = output_folder + "/package.cab"
     output_folder = output_folder + "/package_extracted"
-    extract_7z(archive_path, output_folder)
+    # extract_7z(archive_path, output_folder)
     
     # Read content of package.xml
     current_file = output_folder + "/package.xml"
     root = ET.parse(current_file, parser = ET.XMLParser(encoding = 'utf-8'))
     
+    db_path = "updates.db"
     # Create Updates_metadata table in SQLite database
-    create_metadata_table(root)
+    create_metadata_table(root, db_path, index_content)
     
     # Create File_locations table in SQLite database
-    create_file_locations_table(root)
+    create_file_locations_table(root, db_path)
 
     # Create Update_details table in SQLite database
-    create_details_table(root)
-
-    db.close_connection()
-
-    end_time = time.time()
-    runtime = end_time - start_time
-    print(f"Runtime: {runtime} seconds")
+    create_details_table(root, db_path)
 
 if __name__ == "__main__":
     main()
