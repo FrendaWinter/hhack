@@ -1,5 +1,26 @@
-# hhack
-About hacking!
+<h1>About hacking!</h1>
+
+- [Concept](#concept)
+  - [Web security](#web-security)
+    - [CVE](#cve)
+    - [CWE](#cwe)
+    - [OWASP Top 10](#owasp-top-10)
+  - [Security Principles](#security-principles)
+    - [CIA](#cia)
+    - [DAD](#dad)
+    - [Models](#models)
+      - [Bell-LaPadula Model](#bell-lapadula-model)
+      - [Biba Model](#biba-model)
+      - [Clark-Wilson Model](#clark-wilson-model)
+    - [ISO/IEC 19249](#isoiec-19249)
+    - [Zero Trust](#zero-trust)
+    - [Trust but verify](#trust-but-verify)
+  - [Governance \& Regulation](#governance--regulation)
+    - [Information Security Governance](#information-security-governance)
+    - [Information Security Regulation](#information-security-regulation)
+    - [Key Benefits](#key-benefits)
+    - [Information Security Frameworks](#information-security-frameworks)
+  - [Governance Risk and Compliance (GRC)](#governance-risk-and-compliance-grc)
 
 # Concept
 
@@ -98,19 +119,24 @@ More models:
 
 ISO/IEC 19249 lists five architectural principles:
 
-- `Domain Separation`: Every set of related components is grouped as a single entity; components can be applications, data, or other resources. Each entity will have its own domain and be assigned a common set of security attributes. For example, consider the x86 processor privilege levels: the operating system kernel can run in ring 0 (the most privileged level). In contrast, user-mode applications can run in ring 3 (the least privileged level). Domain separation is included in the Goguen-Meseguer Model.
-- `Layering`: When a system is structured into many abstract levels or layers, it becomes possible to impose security policies at different levels; moreover, it would be feasible to validate the operation. Let’s consider the OSI (Open Systems Interconnection) model with its seven layers in networking. Each layer in the OSI model provides specific services to the layer above it. This layering makes it possible to impose security policies and easily validate that the system is working as intended. Another example from the programming world is disk operations; a programmer usually uses the disk read and write functions provided by the chosen high-level programming language. The programming language hides the low-level system calls and presents them as more user-friendly methods. Layering relates to Defence in Depth.
-- `Encapsulation`: In object-oriented programming (OOP), we hide low-level implementations and prevent direct manipulation of the data in an object by providing specific methods for that purpose. For example, if you have a clock object, you would provide a method increment() instead of giving the user direct access to the seconds variable. The aim is to prevent invalid values for your variables. Similarly, in larger systems, you would use (or even design) a proper Application Programming Interface (API) that your application would use to access the database.
-- `Redundancy`: This principle ensures availability and integrity. There are many examples related to redundancy. Consider the case of a hardware server with two built-in power supplies: if one power supply fails, the system continues to function. Consider a RAID 5 configuration with three drives: if one drive fails, data remains available using the remaining two drives. Moreover, if data is improperly changed on one of the disks, it would be detected via the parity, ensuring the data’s integrity.
-- `Virtualization`: With the advent of cloud services, virtualization has become more common and popular. The concept of virtualization is sharing a single set of hardware among multiple operating systems. Virtualization provides sandboxing capabilities that improve security boundaries, secure detonation, and observance of malicious programs.
+- `Domain Separation`: Every set of related components is grouped as a single entity; components can be applications, data, or other resources. 
+  - Each entity will have its own domain and be assigned a common set of security attributes.
+- `Layering`: When a system is structured into many abstract levels or layers, it becomes possible to impose security policies at different levels; moreover, it would be feasible to validate the operation.
+- `Encapsulation`: In object-oriented programming (OOP), we hide low-level implementations and prevent direct manipulation of the data in an object by providing specific methods for that purpose.
+- `Redundancy`: This principle ensures availability and integrity. 
+  - If one in two power supply fails, the system continues to function. Or Consider a RAID 5 configuration with three drives: if one drive fails, data remains available using the remaining two drives. 
+  - Moreover, if data is improperly changed on one of the disks, it would be detected via the parity, ensuring the data’s integrity.
+- `Virtualization`: Virtualization provides sandboxing capabilities that improve security boundaries, secure detonation, and observance of malicious programs.
 
 ISO/IEC 19249 teaches five design principles:
 
-- `Least Privilege`: You can also phrase it informally as “need-to basis” or “need-to-know basis” as you answer the question, “who can access what?” The principle of least privilege teaches that you should provide the least amount of permissions for someone to carry out their task and nothing more. For example, if a user needs to be able to view a document, you should give them read rights without write rights.
-- `Attack Surface Minimisation`: Every system has vulnerabilities that an attacker might use to compromise a system. Some vulnerabilities are known, while others are yet to be discovered. These vulnerabilities represent risks that we should aim to minimize. For example, in one of the steps to harden a Linux system, we would disable any service we don’t need.
-- `Centralized Parameter Validation`: Many threats are due to the system receiving input, especially from users. Invalid inputs can be used to exploit vulnerabilities in the system, such as denial of service and remote code execution. Therefore, parameter validation is a necessary step to ensure the correct system state. Considering the number of parameters a system handles, the validation of the parameters should be centralized within one library or system.
-- `Centralized General Security Services`: As a security principle, we should aim to centralize all security services. For example, we would create a centralized server for authentication. Of course, you might take proper measures to ensure availability and prevent creating a single point of failure.
-- `Preparing for Error and Exception Handling`: Whenever we build a system, we should take into account that errors and exceptions do and will occur. For instance, in a shopping application, a customer might try to place an order for an out-of-stock item. A database might get overloaded and stop responding to a web application. This principle teaches that the systems should be designed to fail safe; for example, if a firewall crashes, it should block all traffic instead of allowing all traffic. Moreover, we should be careful that error messages don’t leak information that we consider confidential, such as dumping memory content that contains information related to other customers.
+- `Least Privilege`: You should provide the least amount of permissions for someone to carry out their task and nothing more.
+- `Attack Surface Minimization`: Every system has vulnerabilities that an attacker might use to compromise a system. Some vulnerabilities are known, while others are yet to be discovered. These vulnerabilities represent risks that we should aim to minimize.
+  - For example, in one of the steps to harden a Linux system, we would disable any service we don’t need.
+- `Centralized Parameter Validation`: Many threats are due to the system receiving input. Invalid inputs can be used to exploit vulnerabilities in the system. Therefore, parameter validation is a necessary step to ensure the correct system state. 
+  - Considering the number of parameters a system handles, the validation of the parameters should be centralized within one library or system.
+- `Centralized General Security Services`: As a security principle, we should aim to centralize all security services.
+- `Preparing for Error and Exception Handling`: Whenever we build a system, we should take into account that errors and exceptions do and will occur.
 
 ### Zero Trust
 
@@ -118,4 +144,59 @@ Never trust, always verify.
 
 ### Trust but verify
 
-This principle teaches that we should always verify even when we trust an entity and its behaviour.
+This principle teaches that we should always verify even when we trust an entity and its behavior.
+
+## Governance & Regulation
+
+- `Governance`: Managing and directing an organization or system to achieve its objectives and ensure compliance with laws, regulations, and standards.
+- `Regulation`: A rule or law enforced by a governing body to ensure compliance and protect against harm.
+- `Compliance`: The state of adhering to laws, regulations, and standards that apply to an organization or system.
+
+### Information Security Governance
+
+Governance's processes:
+
+- `Strategy`: Developing and implementing a comprehensive information security strategy that aligns with the organization's overall business objectives.
+- `Policies and procedures`: Preparing policies and procedures that govern the use and protection of information assets.
+- `Risk management`: Conduct risk assessments to identify potential threats to the organization's information assets and implement risk mitigation measures.
+- `Performance measurement`: Establishing metrics and key performance indicators (KPIs) to measure the effectiveness of the information security governance program.
+- `Compliance`: Ensuring compliance with relevant regulations and industry best practices.
+
+### Information Security Regulation
+
+- Information security regulation refers to legal and regulatory frameworks that govern the use and protection of information assets. 
+- Regulations are designed to protect sensitive data from unauthorized access, theft, and misuse. Compliance with regulations is typically mandatory and enforced by government agencies or other regulatory bodies. 
+- Examples of information security regulations/standards include 
+  - The General Data Protection Regulation (GDPR)
+  - Payment Card Industry Data Security Standard (PCI DSS)
+  - Personal Information Protection and Electronic Documents Act (PIPEDA), and many more.
+
+### Key Benefits
+
+The following are the benefits of implementing governance and regulation:
+- More Robust Security Posture
+- Increased Stakeholder Confidence
+- Regulatory Compliance
+- Better alignment with business objectives
+- Informed decision-making
+- Competitive advantage
+
+### Information Security Frameworks
+
+The information security framework provides a comprehensive set of documents that outline the organisation's approach to information security and governs how security is implemented, managed, and enforced within the organisation. This mainly includes:
+
+- `Policies`: A formal statement that outlines an organization's goals, principles, and guidelines for achieving specific objectives.
+- `Standards`: A document establishing specific requirements or specifications for a particular process, product, or service.
+- `Guidelines`: A document that provides recommendations and best practices (non-mandatory) for achieving specific goals or objectives.
+- `Procedures`: Set of specific steps for undertaking a particular task or process.
+- `Baselines`: A set of minimum security standards or requirements that an organization or system must meet.
+
+Steps used to develop:
+- `Identify the scope and purpose`: Determine what the document will cover and why it is needed
+- `Research and review`: Research relevant laws, regulations, industry standards, and best practices to ensure your document is comprehensive and up-to-date. Review existing policies, procedures, and other documents to avoid duplicating efforts or contradicting existing guidance.
+- `Draft the document`: Develop an outline and start drafting the document, following best practices for writing clear and concise. Ensure the document is specific, actionable, and aligned with the organization's goals and values.
+- `Review and approval`: Have the document reviewed by stakeholders, such as subject matter experts, legal and compliance teams, and senior management
+- `Implementation and communication`: Communicate the document to all relevant employees and stakeholders, and ensure they understand their roles and responsibilities in implementing it. Develop training and awareness programs to ensure the document is understood and followed.
+- `Review and update`: Periodically review and update the document to ensure it remains relevant and practical. Monitor compliance and adjust the document based on feedback and changes in the threat landscape or regulatory environment.
+
+## Governance Risk and Compliance (GRC)
