@@ -107,3 +107,31 @@ Network mapping is the process of discovering and identifying devices, hosts, an
 Advicer:
 - Start with `nmap -sn -v -T4 <target>`
 - Add port `namp -sn -PS21,22,80,443,445,3389,8080  -T4 <target>`
+- Some udp port `namp -sn -PS21,22,80,443,445,3389,8080 -PU137,138 -T4 <target>`
+
+**Script**:
+- `nmap --script <script_name> --script-args` script name and args (if any) 
+
+## Invation
+
+**IDS invation** 
+
+- Fragment the packet with `-f` `nmap -Pn -sS -F -f <target>`
+    - `--data-length` for specify data length
+- `-D` decoy IP
+    - `nmap -D RND:10 192.168.1.200` random decoy
+    - `nmap -D <ip>,<ip>,ME <target>` specify IP, and `ME` is real scanning IP
+- `--scan-delay` delay between packet scan
+    - Usually 15s for high security system
+- `--host-timeout 5s` timeout for discover host
+    - Usually 30s for large system
+
+**Output format**:
+- `-oN` normal format ~ same as terminal format
+- `-oX` XML format, can export to metasploit framework
+- `-oG` Grepable format
+- `-oA` Output in 3 above format at once
+- `-v` verbose
+- `--reason` Display the reason why port has that result
+- `--open` only show open port
+
