@@ -104,15 +104,26 @@ Network mapping is the process of discovering and identifying devices, hosts, an
     - In many enviroment, system block ACK ping, or RST response
 - `-PE` only send ICMP echo request
 
-Advicer:
+Adviser:
 - Start with `nmap -sn -v -T4 <target>`
 - Add port `namp -sn -PS21,22,80,443,445,3389,8080  -T4 <target>`
+
+## Port scanning
+- `-Pn` port scan (skip host discovery)
+- `-F` common port
+- `nmap -Pn -sS -F <target>` Stealth scan (Use syc scan, doesn't complete connection)
+- TCP connect scan `nmap -Pn -sT <target>` (Complete the connection, then send RST ACK to close connection)
+- Scan UDP port `-sU`
+- Version and service `nmap -T4 -sS -sV -p- <target>`
+- `-O --osscan-guess` tell `nmap` try to guess OS Aggressively
+- `-sV --version-intensity` Tell `nmap` try hard to detect the version
+- `-sC` default script, `--script=<script name>` specify script
+- `--script-help=<script name>` info about script
+<<<<<<< Updated upstream
 - Some udp port `namp -sn -PS21,22,80,443,445,3389,8080 -PU137,138 -T4 <target>`
 
 **Script**:
 - `nmap --script <script_name> --script-args` script name and args (if any) 
-
-## Invation
 
 **IDS invation** 
 
@@ -134,4 +145,3 @@ Advicer:
 - `-v` verbose
 - `--reason` Display the reason why port has that result
 - `--open` only show open port
-
