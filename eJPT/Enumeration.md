@@ -1,4 +1,4 @@
-# Enumeration
+t p# Enumeration
 
 The goal is gather additional info about host and the service run on it
     - Like account name, shares folder, misconfigured service and so on
@@ -13,6 +13,9 @@ The goal is gather additional info about host and the service run on it
     - `services` view services
     - `vulns` view vulns (if any)
 - `db_nmap <nmap options>` Run nmap and export db in msf itself.
+
+**Note**
+- We can set global var for modules with `setg RHOSTS ..`
 
 ### Auxiliary Modules - of MSF
 
@@ -30,6 +33,26 @@ Stronger at port scanning than `nmap`
     - Meterpreter sessions (Console exploit)
         - `run autoroute -s <ip>` Add ip to metasploit ip table
 
+
+## FTP 
+
+1. MSF - Portscan
+2. `search type:auxiliary name:ftp`
+   1. Scan version -> Set RHOSTS -> Set user/pass -> `run`
+   2. `search ProFTPD` (`OroFTPD` is one type of ftp)
+3. We can use brute force to find username and password
+   1. Set `RHOSTS` `USER_FILE` `PASS_FILE`
+   2. `run`
+4. Login from MSF
+5. Use module `scanner/ftp/ftp_login` for login
+   1. Login normally `ftp <target>`
+
+## SMB - 445, 139 (old windows)
+- Use `smb_version` to check version
+- Use `smb_enumusers` for user enumeration
+- Use `smb_enumshares` for share enumeration
+- Use `smb_login` for login or brute force
+    - For normal login `smbclient -L \\\\<ip>\\ -U <username>` or `smbclient \\\\<ip>\\<folder> -U <username>`
 
 ### Web server
 - Auxiliary `http_version` - Check version
