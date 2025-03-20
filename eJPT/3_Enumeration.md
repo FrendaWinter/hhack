@@ -1,9 +1,9 @@
-t p# Enumeration
+# Enumeration
 
 The goal is gather additional info about host and the service run on it
     - Like account name, shares folder, misconfigured service and so on
 
-## MSF - Metasploit Framework
+### MSF - Metasploit Framework
 
 - `db_status` Check db status
     - `msfdb init` to create db (first time use)
@@ -16,7 +16,6 @@ The goal is gather additional info about host and the service run on it
 
 **Note**
 - We can set global var for modules with `setg RHOSTS ..`
-
 ### Auxiliary Modules - of MSF
 
 Used to perform functionality like scanning, discovery and fuzzing.
@@ -53,6 +52,32 @@ Stronger at port scanning than `nmap`
 - Use `smb_enumshares` for share enumeration
 - Use `smb_login` for login or brute force
     - For normal login `smbclient -L \\\\<ip>\\ -U <username>` or `smbclient \\\\<ip>\\<folder> -U <username>`
+
+Script for shares brute force
+
+```bash
+#!/bin/bash
+
+# Define the target and wordlist location
+TARGET="target.ine.local"
+WORDLIST="/root/Desktop/wordlists/shares.txt"
+
+# Check if the wordlist file exists
+if [ ! -f "$WORDLIST" ]; then
+    echo "Wordlist not found: $WORDLIST"
+    exit 1
+fi
+
+# Loop through each share in the wordlist
+while read -r SHARE; do
+    echo "Testing share: $SHARE"
+    smbclient //$TARGET/$SHARE -N -c "ls" &>/dev/null
+
+    if [ $? -eq 0 ]; then
+        echo "[+] Anonymous access allowed for: $SHARE"
+    fi
+done < "$WORDLIST"
+```
 
 ### Web server
 - Auxiliary `http_version` - Check version
