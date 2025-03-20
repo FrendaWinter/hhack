@@ -68,3 +68,33 @@ CVE-2019-0708
 - `msf` exploit modules `cve_20..._bluekeep_rce`
     - Use `show targets` for display targets systems -> `set target <number>`
     - Sometimes Windows system will crash during the exploit
+
+
+# Nessus
+
+[Nessus Webpage](https://www.tenable.com/products/nessus)
+
+[Lab enviroment](https://github.com/rapid7/metasploitable3)
+
+- Download the free edition
+- Change setting and + new scan -> target
+- Nessus scan can be import into msf
+    - `vulns -p 445` filter vuln for port 445
+    - `search cve:<cve_id or year> name:<service>`
+
+# WMAP
+
+WMAP is web vulns scanner. WMAP is fully intergrated with MSF
+
+- Open `msfconsole` -> `load wmap`
+- `wmap_sites` Use to add, list and delelte, display site
+    - `wmap -a <target>`
+- `wmap_targets` add or changing target.
+    - `wmap_targets -t <target_url>`
+- `wmap_run` `-t` show available modules
+    - `-e` Use all availabe modules
+- `wmap_vulns -l` list vulns
+
+
+- module `http_put` put or delete file on server
+    - Set URI path Rhosts and run
