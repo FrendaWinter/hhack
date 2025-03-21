@@ -63,10 +63,12 @@ Exploit steps:
 
 ## BlueKeep - RDP Vulns
 
-CVE-2019-0708
+CVE-2019-0708: This vulns target kernel space memory.
 
 - `msf` exploit modules `cve_20..._bluekeep_rce`
     - Use `show targets` for display targets systems -> `set target <number>`
+    - Must be set correct target!!
+    - If RAM size too high, maybe exploit will fail.
     - Sometimes Windows system will crash during the exploit
 
 ### Badblue
@@ -90,6 +92,16 @@ CVE-2019-0708
 - FTP - 21/23
 - SAMBA 445
 
+## Shellshock 
+- CGI script with some specical character in request can make Linux target execute bash script
+
+Exploit by using burpsuite
+
+[Ref](https://github.com/opsxcq/exploit-CVE-2014-6271)
+
+**Steps**:
+- `nmap --script http-shellshock --script-args "http-shellshock.uri=/gettime.cgi" <target>` - Scan for vuln
+- Open burpsuite and intercept the request, change the user-agent to contains `() {:;};`
 
 # Nessus
 
