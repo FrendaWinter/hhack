@@ -17,3 +17,6 @@ $password=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64Str
 ssword))
 echo $password
 ```
+
+- If we gain access but it a shell, we can try backup the sessions, and try to upgrade it to meterpreter
+  - By `sessions -u 1` `-u` mean upgrade, `1` is sessions id

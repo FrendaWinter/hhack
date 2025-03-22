@@ -8,7 +8,7 @@ Have 2 part:
 
 OSI (Open system interconnection) ~ 7 layer (Concept framework)
 
-![OSI](./Assets/image.png)
+![OSI](./Assets/image_0.png)
 
 ## Network layer
 

