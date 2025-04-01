@@ -7,3 +7,6 @@
 
 The version 2.0.7 have server side vuln [Exploit-50262](https://www.exploit-db.com/exploits/50262)
 - Download and run with python3 (Must have creds)
+
+## Note
+- `netstat -antp` Check open port on host
