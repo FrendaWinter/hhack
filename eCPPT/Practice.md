@@ -10,6 +10,8 @@ The version 2.0.7 have server side vuln [Exploit-50262](https://www.exploit-db.c
 
 ## Note
 - `netstat -antp` Check open port on host
+- Doesn't know what type of hash: `hash-identifier <hash>`
+- Cracking `Des(Unix)` - `john --format=descrypt hash.txt`
 
 ### Pretext Phishing document
 
