@@ -1,66 +1,87 @@
-
+## Assembly
 
 - Each CPU has it own instruction set.
 - Assembly language is closely tied to the architecture of the target CPU
     - x86 assembly language is used for Intel and AMD.
     - ARM assembly language is used for ARM-based processor.
-- The architecture of the CPU (32 or 64 bit) refer to the width/size of the CPU Register
-  - General Purpose registers (GPRs): Used to store data temporarily during program execution
-  - Each CPU have it fixed set of registers that are accessed when required.
 
-Type of GPRs: (32 bit)
-- EAX, EBX, ECX, EDX: General data manipulation and arithmetic operations
-- ESI, EDI: Often used for string manipulation operations
-- ESP, EBP: Used for managing the stack (ESP ~ Stack pointer, EBP for base pointer)
+![CPU components](./Assets/image_6.png)
 
-32 bit start with an 'E', 64 bit start with a 'R' ~ RAX, RBX, RCX, RDX, etc
+Registers:
+- PC: Progam counter
+- IR: Instructions
+- Accumlator: Store the result of arithmetic and logic operations
+- General-purpost registers
 
-![x86 Registers](./Assets/image_7.png)
+## How this mf work
 
-- EIP: Instruction pointer: Store address point to the next instruction.
+Think it like you run a sequece of syscall
 
-## Process memory
+Example, like hello world:
+- Call `write`
+- Call `exit`
+- Goto https://syscalls.w3challs.com/?arch=x86
+- Represent the syscall with correct value of register
+- we use `mov` to move data to register
+- Call `init_module` to run the system call
+- Opcode ref https://en.wikipedia.org/wiki/X86_instruction_listings
 
-Modern OS implement a concept known as virtual memory, which abstracts physical memory resource and presents each process with a virtual address space
+```asm
+; Hello world!
+; Author: Frenda
 
-- Code segment
-- Data segment
-- BSS segment: Uninitialized data.
-- Heap segment
-- Stack segment
+section .data
+	hello db 'Hello, world!',0xA  ;Null terminated string
 
-![Memory segment](./Assets/image_8.png)
+section .text
+	global _start
 
-![Stack and Heap](./Assets/image_9.png)
+_start:
+	mov eax, 0x4 ; Move syscall 0x4 (sys_write) to eax
+	mov ebx, 0x1 ; File descriptor 1 (stdout)
+	mov ecx, hello ; Pointer to string
+	mov edx, 13 ; Length of the string
+	int 0x80 ; Call kernel
 
-ESP stack pointer, contain address of the top of the stack.
+	; Gracefully Exit
+	mov eax, 0x1 ; System call (sys_exit)
+	xor ebx, ebx ; Return 0, store in ebx
+	int 0x80 ; Call kernel
+```
 
-**Procedure & Functions**:
-- Functions contains two important components, the prologue and the epilogue.
-  - The prologue prepare the stack to be used, similar to putting a bookmark in the book
-  - When the functions has completed, the epilogue reset the stack to the prologue settings 
+Complie with `nasm -f elf hello.asm` -> Output `hello.0` file
+Linking `ld -m elf_i386 -o hello hello.o` -> Output executable `hello`
 
-A **call stack** is composed of 1 or many several **stack frames**. Each stack frame corresponds to a call to a function or procedure which has not yet terminated with a return.
+### Data and variable
 
-To use a **stack frame**, a thread keeps two pointers, one is called the **Stack Pointer (SP)**, and the other is called the **Frame Pointer (FP)**. SP always points to the "top" of the stack, and FP always points to the "top" of the frame. Additionally, the thread also maintains a **program counter (PC)** which points to the next instruction to be executed.
+Using gdb to disassembly exe
 
-The following are stored on the stack frame:
-- local variables and temporaries;
-- actual parameters of the current instruction (procedure, function, etc.).
+- `gdb -q <exe_file>`
+- `set disassembly intel` Disassembly intel chip
+- `set pagination off`
+- `info functions` view functions
+    - `disass start` Disassembly the `_start` functions
+    - `br *_start + 14` Set breakpoint from start +14
+    - `r` ~ `run`
+    - `info variables` Show all variables symbol
+    - `x/s &val` Show `val` variable
+    - `set {char[8]} &hello = "hi Manh\n"` Set new value for var `hello`
+- `info registers` Register info
+- `info locals` to list "Local variables of current stack frame"
+- `info args` to list "Arguments of the current stack frame" 
 
-There are different calling conventions regarding the cleaning of the stack.
+# Buffer overflow.
 
-[Stack Frame](https://stackoverflow.com/questions/10057443/explain-the-concept-of-a-stack-frame-in-a-nutshell)
+Unsafe operations:
+- strcpy
+- strcat
+- gets/fgets
+- vsprintf
+- printf
+- memcpy
 
-Example: Main() -> a() -> b()
+Hunting buffer overflow: Follow the crash, see it crash by buffer overflow or not by using debugger
 
-![flow](./Assets/image_10.png)
+Company usually fuzzing before release, common buffer overflow it hard to find.
 
-## Assemblers
-
-Assembly -> Machine code.
-
-- MASM Microsoft Marco Assembler
-- GNU Assembler
-
-![Assembler](./Assets/image_11.png)
+Fuzzing is a software testing technique the provides invalid data, unexpected or random to the program.

