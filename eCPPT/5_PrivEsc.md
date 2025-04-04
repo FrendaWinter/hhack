@@ -151,3 +151,21 @@ void _init() {
 Compile `gcc -fPIC -shared -o shell.so shell.c -nostartfiles`
 
 Run `sudo LD_PRELOAD=/home/student/shell.so apache2`
+- Setup the `multi/handler`
+  - `set InitialAutoRunScript post/windows/manage/migrate` Set to run migrate after getting access (To keep session alive)
+
+### Via Registry autorun
+
+Registry that control autoruns and check their permission, if it have weak permission, write value of registry point to a malicious executable or script.
+
+Typical registry keys associated with autoruns include:
+- HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+- HKCU\...\CurrentVersion\Run
+- HKLM\System\CurrentControlSet\Services
+
+`Get-ACL "C:\Program Files\HTTPServer\" | Format-List` ~ Get access control of folder
+
+### Access token
+
+- Impersonate-level tokens are created as a direct result of a non-interactive login on Windows, typically through specific system services or domain logons.
+- Delegate-level tokens are typically created through an interactive login on Windows, primarily through a traditional login or through remote access protocols such as RDP.
