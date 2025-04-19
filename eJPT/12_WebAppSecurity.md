@@ -30,10 +30,10 @@ Key different between web app pentest and web app security testing
 ---
 
 Web app threat & Risks
-- Threat refer to any potential source of harm and adverse event that may expoit vulnerabiliry in a system.
-    - Threat can be human-made (Phishing, exploit ..) or natuarl
+- Threat refer to any potential source of harm and adverse event that may exploit vulnerability in a system.
+    - Threat can be human-made (Phishing, exploit ..) or natural
 - Risk is potential for a loss or ham resulting from a threat exploit a vulnerability in a system or organization.
-    - Risk is often meansurds in term of the likelihood of an incident happening and the potential magnitude of its impact
+    - Risk is often measures in term of the likelihood of an incident happening and the potential magnitude of its impact
 
 Common threat and risks
 
@@ -48,10 +48,10 @@ Usually use client-server Model
 Client-side processing need:
 - User Interaction: Client-side processing is well-suited for tasks that require immediate user interaction and feedback, as there is no need to send data back and forth to the server.
 - Responsive User Experience: Since processing happens locally, client-side operations can provide a smoother and more responsive user experience.
-- JavaScript: JavaScript is the primary programming language used for clientside processing. It allows developers to manipulate the web page's content, handle user interactions, and perform validations without involving the server.
+- JavaScript: JavaScript is the primary programming language used for client side processing. It allows developers to manipulate the web page's content, handle user interactions, and perform validations without involving the server.
 - Data Validation: Client-side validation ensures that user input meets specific criteria before it is sent to the server, reducing the need to make unnecessary server requests.
 
-Server-side porcessing include:
+Server-side processing include:
 - Data Processing: Server-side processing is ideal for tasks that involve sensitive data handling, complex computations, and interactions with databases or external services.
 - Security: Since server-side code is executed on a trusted server, it is more secure than client-side code, which can be manipulated by users or intercepted by attackers.
 - Server-side Languages: Programming languages like PHP, Python, Java, Ruby, and others are commonly used for server-side processing.
@@ -116,3 +116,42 @@ application/json).
 **Crawling and spidering**
 - Crawling is the process of navigating around the web application following links, submit forms ...
 - Spidering is the process of auto discover new resource on a web app
+
+## Authentication
+
+### HTTP digest Authentication
+
+Control with www-authenticate header:
+
+```
+WWW-Authenticate: Digest realm="testrealm@host.com",
+                  qop="auth,auth-int",
+                  nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",
+                  opaque="5ccc069c403ebaf9f0171e9517f40e41"
+```
+
+- Realm: A descriptive string indicating the protections space
+- qop (Quality of Protection): Specifies the quality of protection. Commonly set to auth
+- nonce: A unique string generate by the server for each request to prevent relay attacks
+- opaque: An opaque value set by the server, which the client must return unchanged in the response
+
+Client Response: The client constructs a response using the following components:
+- Username
+- Realm
+- Password
+- Nonce
+- Request URI (the path to the protected resource)
+- HTTP method (e.g., GET, POST)
+- cnonce (a client-generated nonce)
+- qop (the quality of protection)
+- H(A1) and H(A2), which are hashed values derived from the components
+
+It then calculates a response hash (response) based on these components and includes it in an Authorization header.
+
+Server Validation: The server receives the request with the Authorization header and validates the response hash calculated by the client. It does this by reconstructing the same components and calculating its own response hash.
+- If the hashes match, the server considers the client authenticated and grants access to the requested resource.
+
+We can use hydra to brute force the hash authenticate
+
+`hydra -l admin -P <word_list> <target_ip> http-get /digest/`
+- `/digest` This is the folder that be protected with authen

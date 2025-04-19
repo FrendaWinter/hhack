@@ -85,7 +85,7 @@ nc -zv <HOST> <PORT>
 
 **Passive**
 
-```
+```sh
 host <HOST>
 whatweb <HOST>
 whois <HOST>
@@ -118,7 +118,7 @@ inurl:wp-config.bak
 
 **DNS**
 
-```
+```sh
 sudo nano /etc/hosts
 dnsenum <HOST>
 # e.g. dnsenum zonetransfer.me
@@ -131,7 +131,7 @@ fierce --domain <HOST>
 
 **Host Discovery**
 
-```
+```sh
 ## Ping scan
 sudo nmap -sn <TARGET_IP/NETWORK>
 ## ARP scan
@@ -180,11 +180,9 @@ nmap -A -oA outputfile <TARGET_IP>
 
 #### Footprinting & Scanning
 
-
-
 **Network Discovery**
 
-```
+```sh
 sudo arp-scan -I eth1 <TARGET_IP/NETWORK>
 ping <TARGET_IP>
 sudo nmap -sn <TARGET_IP/NETWORK>
@@ -208,7 +206,7 @@ fping -I eth1 -g <TARGET_IP/NETWORK> -a fping -I eth1 -g <TARGET_IP/NETWORK> -a 
 
 **Nmap**
 
-```
+```sh
 sudo nmap -p 445 -sV -sC -O <TARGET_IP>
 nmap -sU --top-ports 25 --open <TARGET_IP>
 
@@ -245,7 +243,7 @@ nmap -p445 --script=smb-vuln-* <TARGET_IP>
 
 **SMBMap**
 
-```
+```sh
 smbmap -u guest -p "" -d . -H <TARGET_IP>
 
 smbmap -u <USER> -p '<PW>' -d . -H <TARGET_IP>

@@ -13,8 +13,7 @@
 Powershell for decode 64
 ```powershell
 $password='<Hash_password>'
-$password=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($pa
-ssword))
+$password=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($password))
 echo $password
 ```
 
