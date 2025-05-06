@@ -1,0 +1,3 @@
+[submodule "Bounty"]
+	path = Bounty
+	url = git@github.com:FrendaWinter/Bounty.git
