@@ -1,3 +1,6 @@
 [submodule "Bounty"]
 	path = Bounty
 	url = git@github.com:FrendaWinter/Bounty.git
+[submodule "Projects/Recon-Tool"]
+	path = Projects/Recon-Tool
+	url = git@github.com:FrendaWinter/Recon-Tool.git

@@ -6,13 +6,13 @@ In client-side attacks, attacker deliver the malicous code via standard delivery
 
 ![Compare](./Assets/image_0.png)
 
-Pharse:
-- Reconnasissance
+Phrase:
+- Reconnaissance
 - Target identification
 - Payload, resource development
 - Payload Preparation
 - Payload delivery
-- Payload excution
+- Payload execution
 - Post exploit
 
 **Client-side attack vector**: Refer to method/path used by attacker to exploit.
@@ -33,7 +33,7 @@ Pharse:
 
 **Client fingerprinting**: An atice client information gathering technique used to gather infor about target system web brower and underlying OS in order to aid in ther developemtn of tailor made (client specific) payload for initial access
 
-**Browser Fingerpriting**: Leverages client-side scripting language like JS to extract info about target browser and underlying OS
+**Browser Fingerprinting**: Leverages client-side scripting language like JS to extract info about target browser and underlying OS
 - Set up fake webpage to runs a specific JS script when users visit the webpage
     - Some browers can block JS execution
 - Infor should collect
@@ -44,7 +44,7 @@ Pharse:
     - [FingerprintJS2](https://github.com/LukasDrgon/fingerprintjs2)
         - Setup website with apache and try to run it
 
-## Resource developemt and weaponizations
+## Resource development and weaponizations
 
 - Resource focuses on acquiring or building the necessary resources for an attack
     - [Att&ck resource Development](https://attack.mitre.org/tactics/TA0042/)
@@ -54,7 +54,7 @@ Term used by:
 - MITRE ATT&CK framework
 - [Cyber kill chain (Lockheed Martin)](https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html)
 
-[Pharse exploit](./Assets/image_1.png)
+[Phrase exploit](./Assets/image_1.png)
 
 # VBA Marco
 
